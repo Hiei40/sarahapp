@@ -2,9 +2,10 @@ import { UserModel } from "../../DB/models/user.model.js";
 import { asyncHandler } from 'express-async-handler';
 import { findOne, create } from '../../DB/db.service.js';
 import { successResponse } from '../../utils/responsed.js';
-import bcrypt from "bcryptjs";
-import { generateIHash } from './your-hash-file.js'; // Adjust the import path
-
+// import bcrypt from "bcryptjs";
+import CryptoJS from "crypto-js";
+import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
+import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
 // ================== Signup Controller ==================
 export const signup = asyncHandler(async (req, res, next) => {
   const { fullName, email, password, phone } = req.body;
@@ -19,34 +20,36 @@ export const signup = asyncHandler(async (req, res, next) => {
     return res.status(409).json({ success: false, message: "Email already exists" });
   }
 
-  // 2. تشفير كلمة المرور using generateIHash
+  // 2. تشفير كلمة المرور
   const hashedPassword = await generateIHash(password, 10);
+const encphone=await generateIEncrypt(phone,"HamadaSalam3laHambozo").toString();
 
-  // 3. إنشاء المستخدم
+  // 3. إنشاء المستخدم مع isActive = true
   const user = await create({
     model: UserModel,
-    data: { fullName, email, password: hashedPassword, phone },
+    data: { fullName, email, password: hashedPassword,phone: encphone, isActive: true },
   });
+
+  // 4. إزالة كلمة المرور من الاستجابة
+  const { password: _, ...userData } = user._doc;
 
   return successResponse({
     res,
     message: "User created successfully",
     status: 201,
-    data: { user },
+    data: { user: userData },
   });
 });
+
 
 // ================== Login Controller ==================
 export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // 1. ابحث عن المستخدم عن طريق البريد الإلكتروني مع تأكيد النشاط
+  // 1. ابحث عن المستخدم وتأكد أنه نشط
   const user = await findOne({
     model: UserModel,
-    filter: { 
-      email,
-      isActive: true // التأكد من أن المستخدم نشط
-    },
+    filter: { email, isActive: true },
   });
 
   if (!user) {
@@ -59,10 +62,12 @@ export const login = asyncHandler(async (req, res, next) => {
     return res.status(401).json({ success: false, message: "Invalid email or password" });
   }
 
-  // 3. تسجيل الدخول ناجح
+  // 3. إزالة كلمة المرور من الاستجابة
+  const { password: _, ...userData } = user._doc;
+
   return successResponse({
     res,
     message: "Login successful",
-    data: { user },
+    data: { user: userData },
   });
 });

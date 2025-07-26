@@ -3,6 +3,10 @@ export const findOne = async ({ model, filter = {}, select = "",populate=[] }) =
   return await model.findOne(filter).select(select).populate(populate);
 };
 
+export const findbyid = async ({ model, id, select = "",populate=[] }) => {
+  return await model.findbyid(id).select(select).populate(populate);
+};
+
 export const create =async ({
 model,
 data=[{}],
