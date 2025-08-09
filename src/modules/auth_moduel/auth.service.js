@@ -4,6 +4,7 @@ import { findOne, create } from '../../DB/db.service.js';
 import { successResponse } from '../../utils/responsed.js';
 // import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
+import { jwt } from "jwt-decode";
 import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
 import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
 // ================== Signup Controller ==================
@@ -64,7 +65,22 @@ export const login = asyncHandler(async (req, res, next) => {
 
   // 3. إزالة كلمة المرور من الاستجابة
   const { password: _, ...userData } = user._doc;
+// const token= jwt.sign({_id:user._id,isLoggedIn:true},"FW$Q$T$#@%",
+// {
+  
 
+// expiresIn: 60*60*24
+
+// }
+const token= jwt.sign({_id:user._id,isLoggedIn:true},"FW$Q$T$#@%",
+{
+  
+
+expiresIn: '1y',
+
+}
+// algorithm
+);
   return successResponse({
     res,
     message: "Login successful",
