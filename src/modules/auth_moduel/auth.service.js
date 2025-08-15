@@ -1,10 +1,9 @@
 import { UserModel } from "../../DB/models/user.model.js";
-import { asyncHandler } from 'express-async-handler';
-import { findOne, create } from '../../DB/db.service.js';
-import { successResponse } from '../../utils/responsed.js';
+// import { asyncHandler } from 'express-async-handler';
+import { findOne, create } from "../../DB/db.service.js";
+import { asyncHandler, successResponse } from '../../utils/responsed.js';
 // import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
-import { jwt } from "jwt-decode";
 import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
 import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
 // ================== Signup Controller ==================

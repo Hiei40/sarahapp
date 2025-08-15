@@ -1,8 +1,10 @@
 import express from 'express';
-
+import path from 'node:path';
+import  dotenv from 'dotenv';
+dotenv.config({path:path.resolve("./config/.dev.env")});
 // import './src/DB/model/associations' // تقدر تفعلها وقت ما تحتاجها
-import userController from './modules/user/user.controller.js';
-import authController from './modules/auth/auth.controller.js';
+import userController from './modules/user_moduel/user.controller.js';
+import authController from './modules/auth_moduel/auth.controller.js';
 import connectDB from './DB/connection.db.js';
 
 const 
@@ -23,6 +25,9 @@ bootstrap = async () => {
 
   // Global error handler
   app.use(globalerrorhandling);
+
+  
+
 
   app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 };

@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    const uri = process.env.Dburl;
-    const result = await mongoose.connect(uri, {
+    // const uri = process.env.Dburl;
+    const result = await mongoose.connect("mongodb+srv://Mokhaled:2GASWsHSdKwD89nO@sarah-app.mv4o3pi.mongodb.net/Sarah-app", {
       serverSelectionTimeoutMS: 30000
     })
     console.log(result.models);

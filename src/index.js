@@ -1,8 +1,3 @@
-import path from 'node:path';
-import  dotenv from 'dotenv';
+import bootstrap from "./app.controller.js";
 
-
-dotenv.config({path:path.resolve("./config/.dev.env")});
-import bootstrarp from "./app.controller.js";
-
-bootstrarp()
+bootstrap();

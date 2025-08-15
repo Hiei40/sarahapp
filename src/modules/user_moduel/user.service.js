@@ -1,8 +1,8 @@
 import { asyncHandler, successResponse } from "../../utils/responsed.js";
-import * as dbService from "../../utils/db.service.js";
+import * as dbService from "../../DB/db.service.js";
 import { UserModel } from "../../DB/models/user.model.js";
-import {generateIEncrypt,compareEncrypt} from "../auth_moduel"
-import { jwt } from "jwt-decode";
+import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js"
+
 
 export const profile = asyncHandler(async (req, res, next) => {
  console.log (req.headers);
