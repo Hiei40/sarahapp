@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start:dev": "node --watch index.js"
+  
   },
   "keywords": [],
   "author": "",
