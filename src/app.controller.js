@@ -5,9 +5,10 @@ import userController from './modules/user/user.controller.js';
 import authController from './modules/auth/auth.controller.js';
 import connectDB from './DB/connection.db.js';
 
-const bootstrap = async () => {
+const 
+bootstrap = async () => {
   const app = express();
-  const port = 3000;
+  const port = process.env.port;
 
   await connectDB();
 

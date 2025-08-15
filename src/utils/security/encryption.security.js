@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-export const generateIEncrypt=async({plaintext="",secretkey="hamdaSalam3lahambozo"}={})=>{
+export const generateIEncrypt=async({plaintext="",secretkey=process.env.secretkey}={})=>{
 return CryptoJS.AES.encrypt(plaintext,secretkey).toString();
 }
 

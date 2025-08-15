@@ -54,36 +54,38 @@ export const login = asyncHandler(async (req, res, next) => {
   });
 
   if (!user) {
-    return res.status(401).json({ success: false, message: "Invalid email or password" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid email or password" });
   }
 
   // 2. تحقق من كلمة المرور
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(401).json({ success: false, message: "Invalid email or password" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid email or password" });
   }
 
-  // 3. إزالة كلمة المرور من الاستجابة
+  // 3. إنشاء التوكينات
+  const accessToken = jwt.sign(
+    { _id: user._id, isLoggedIn: true },
+    "FW$Q$T$#@%",
+    { expiresIn: 60 * 60 * 24 } // 24 ساعة
+  );
+
+  const refreshToken = jwt.sign(
+    { _id: user._id, isLoggedIn: true },
+    "FW$Q$T$#@%",
+    { expiresIn: "1y" } // سنة
+  );
+
+  // 4. إزالة كلمة المرور من الاستجابة
   const { password: _, ...userData } = user._doc;
-// const token= jwt.sign({_id:user._id,isLoggedIn:true},"FW$Q$T$#@%",
-// {
-  
 
-// expiresIn: 60*60*24
-
-// }
-const token= jwt.sign({_id:user._id,isLoggedIn:true},"FW$Q$T$#@%",
-{
-  
-
-expiresIn: '1y',
-
-}
-// algorithm
-);
   return successResponse({
     res,
     message: "Login successful",
-    data: { user: userData },
+    data: { user: userData, accessToken, refreshToken },
   });
 });

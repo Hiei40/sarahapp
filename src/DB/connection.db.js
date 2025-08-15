@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    const uri = "mongodb+srv://Route2000:Route123456@cluster0.eps5iuy.mongodb.net/"
+    const uri = process.env.Dburl;
     const result = await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 30000
     })
