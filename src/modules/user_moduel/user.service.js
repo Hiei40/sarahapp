@@ -1,17 +1,17 @@
 import { asyncHandler, successResponse } from "../../utils/responsed.js";
 import * as dbService from "../../DB/db.service.js";
 import { UserModel } from "../../DB/models/user.model.js";
-import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js"
+import { generateIEncrypt, compareEncrypt } from "../../utils/security/encryption.security.js"
 
 
 export const profile = asyncHandler(async (req, res, next) => {
- console.log (req.headers);
- const { authorization}=req.headers;
- const decode=jwt.verify(authorization,"FW$Q$T$#@%");
- console.log(decode);
+  console.log(req.headers);
+  const { authorization } = req.headers;
+  const decode = jwt.verify(authorization, "FW$Q$T$#@%");
+  console.log(decode);
 
- const user = await dbService.findById({
- 
+  const user = await dbService.findById({
+
     model: UserModel,
     id: decode._id
   });
@@ -19,8 +19,7 @@ export const profile = asyncHandler(async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
-user.phone=generateIEncrypt(user.phone,"hamda salem ala hambozo").toString(CryptoJS.enc.Utf8);
+  user.phone = generateIEncrypt(user.phone, "hamda salem ala hambozo").toString(CryptoJS.enc.Utf8);
 
   return successResponse({ res, message: "Done", data: { user } });
 });
- 
