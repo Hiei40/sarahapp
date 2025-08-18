@@ -19,6 +19,7 @@ bootstrap = async () => {
 
   // Convert Buffer Data
   app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
   // App routing
   app.get('/', (req, res) => res.json({ message: "Welcome to app ❤️" }));

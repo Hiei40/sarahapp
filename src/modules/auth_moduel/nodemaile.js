@@ -1,25 +1,12 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
+  host: "smtp.gmail.com",
   port: 587,
-  secure: false, // true for 465, false for other ports
+  secure: false, // true للـ 465 بس
   auth: {
-    user: "maddison53@ethereal.email",
-    pass: "jn7jnAPss4f63QBp6D",
+    user: "k.abdalrhem@gmail.com",
+    pass: "uszegoclukkhxdsx", // ⚠️ خليه في ENV عشان الأمان
   },
 });
-
-// Wrap in an async IIFE so we can use await.
-(async () => {
-  const info = await transporter.sendMail({
-    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
-    to: "bar@example.com, baz@example.com",
-    subject: "Hello ✔",
-    text: "Hello world?", // plain‑text body
-    html: "<b>Hello world?</b>", // HTML body
-  });
-
-  console.log("Message sent:", info.messageId);
-})();
-
+export { transporter };

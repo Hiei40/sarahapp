@@ -2,46 +2,65 @@ import { UserModel } from "../../DB/models/user.model.js";
 // import { asyncHandler } from 'express-async-handler';
 import { findOne, create } from "../../DB/db.service.js";
 import { asyncHandler, successResponse } from '../../utils/responsed.js';
-// import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
 import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
 import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
-import nodemailer from "nodemailer";
-
+import { transporter } from "./nodemaile.js";
 // ================== Signup Controller ==================
-export const signup = asyncHandler(async (req, res, next) => {
-  const { fullName, email, password, phone } = req.body;
+export const signUp= async (req, res) => {
+  try {
+    const { fullName, email, password, phone } = req.body;
 
-  // 1. تحقق من أن البريد الإلكتروني غير مستخدم
-  const existingUser = await findOne({
-    model: UserModel,
-    filter: { email },
-  });
+    // check if email exists
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "❌ Email already registered" });
+    }
 
-  if (existingUser) {
-    return res.status(409).json({ success: false, message: "Email already exists" });
-  }
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 2. تشفير كلمة المرور
-  const hashedPassword = await generateIHash(password, 10);
-const encphone=await generateIEncrypt(phone,"HamadaSalam3laHambozo").toString();
+    // create user
+    const user = await UserModel.create({
+      fullName,
+      email,
+      phone,
+      password: hashedPassword,
+    });
 
-  // 3. إنشاء المستخدم مع isActive = true
-  const user = await create({
-    model: UserModel,
-    data: { fullName, email, password: hashedPassword,phone: encphone, isActive: true },
-  });
+    // send welcome email
+  await transporter.sendMail({
+  from: '"Sarah App 👋" <k.abdalrhem@gmail.com>',
+  to: user.email, // ابعت للي سجل مش لنفسك بس
+  subject: "Welcome to SarahApp 🎉",
+  html: `
+    <h2>Hi ${user.fullName || "User"} 👋</h2>
+    <p>Welcome to <b>SarahApp</b>! 🎉</p>
 
-  // 4. إزالة كلمة المرور من الاستجابة
-  const { password: _, ...userData } = user._doc;
+
+  `,
+});
+
 
   return successResponse({
-    res,
-    message: "User created successfully",
-    status: 201,
-    data: { user: userData },
-  });
-});
+      res,
+      status: 201,
+      message: "✅ User registered successfully & email sent",
+      data: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+      },
+    });
+
+
+  } catch (err) {
+    console.error("SignUp Error:", err);
+    return res.status(500).json({ message: "❌ Internal server error" });
+  }
+};
 
 
 // ================== Login Controller ==================
