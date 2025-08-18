@@ -6,6 +6,8 @@ import { asyncHandler, successResponse } from '../../utils/responsed.js';
 import CryptoJS from "crypto-js";
 import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
 import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
+import nodemailer from "nodemailer";
+
 // ================== Signup Controller ==================
 export const signup = asyncHandler(async (req, res, next) => {
   const { fullName, email, password, phone } = req.body;
@@ -86,5 +88,76 @@ export const login = asyncHandler(async (req, res, next) => {
     res,
     message: "Login successful",
     data: { user: userData, accessToken, refreshToken },
+  });
+});
+
+export const updatePassword = asyncHandler(async (req, res, next) => {
+  const { email, newPassword } = req.body;
+
+  // 1. تحقق من البيانات
+  if (!email || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and new password are required",
+    });
+  }
+
+  // 2. ابحث عن المستخدم
+  const user = await findOne({
+    model: UserModel,
+    filter: { email, isActive: true },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // 3. اعمل hash للباسورد الجديد
+  const hashedPassword = await generateIHash(newPassword, 10);
+
+  // 4. اعمل update
+  user.password = hashedPassword;
+  await user.save();
+
+  // 5. رد بالنجاح
+  return successResponse({
+    res,
+    message: "Password updated successfully",
+    data: { email: user.email },
+  });
+});
+
+export const hi = asyncHandler(async (req, res, next) => {
+  const { email } = req.body; 
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required to say hi",
+    });
+  }
+
+  const user = await findOne({
+    model: UserModel,
+    filter: { email, isActive: true },
+  });
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email, you can't say hi",
+    });
+  }
+
+  // نشيل الباسوورد من الاستجابة
+  const { password: _, ...userData } = user._doc;
+
+  return successResponse({
+    res,
+    message: `I say hi to ${user.fullName}`,
+    data: { user: userData },
   });
 });
