@@ -11,7 +11,13 @@ export const genratetoken = async ({
 
     return jwt.sign(payload, signature, options);
 }
-
+export const generateRefreshToken = async ({
+    payload = {},
+    signature = process.env.Refresh_token_Signature,
+    options = { expiresIn: "1y" }
+} = {}) => {
+    return jwt.sign(payload, signature, options);
+}
 
 export const verifytoken = async ({ token = "", signature = process.env.Access_token_Signature, } = {}) => {
     return jwt.verify(token, signature);
