@@ -30,18 +30,14 @@ export const signUp= async (req, res) => {
     });
 
     // send welcome email
-  await transporter.sendMail({
+await transporter.sendMail({
   from: '"Sarah App 👋" <k.abdalrhem@gmail.com>',
-  to: user.email, // ابعت للي سجل مش لنفسك بس
+  to: user.email, // هنا إنت مظبوط، بتبعت للمستخدم اللي سجل
   subject: "Welcome to SarahApp 🎉",
   html: `
-    <h2>Hi ${user.fullName || "User"} 👋</h2>
     <p>Welcome to <b>SarahApp</b>! 🎉</p>
-
-
   `,
 });
-
 
   return successResponse({
       res,
@@ -111,72 +107,47 @@ export const login = asyncHandler(async (req, res, next) => {
 });
 
 export const updatePassword = asyncHandler(async (req, res, next) => {
-  const { email, newPassword } = req.body;
+  const { email, newPassword, confirmPassword } = req.body;
 
-  // 1. تحقق من البيانات
-  if (!email || !newPassword) {
+  if (!email || !newPassword || !confirmPassword) {
     return res.status(400).json({
       success: false,
-      message: "Email and new password are required",
+      message: "❌ Email, new password and confirm password are required",
     });
   }
 
-  // 2. ابحث عن المستخدم
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "❌ New password and confirm password do not match",
+    });
+  }
+
+  // عدل هنا: ابحث فقط بالإيميل
   const user = await findOne({
     model: UserModel,
-    filter: { email, isActive: true },
+    filter: { email }, // حذف شرط isActive
   });
 
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: "User not found",
+      message: "❌ User not found",
     });
   }
 
-  // 3. اعمل hash للباسورد الجديد
-  const hashedPassword = await generateIHash(newPassword, 10);
+  // 4. اعمل hash للباسورد الجديد
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  // 4. اعمل update
+  // 5. حدّث الباسورد
   user.password = hashedPassword;
   await user.save();
 
-  // 5. رد بالنجاح
+  // 6. رجّع response نجاح
   return successResponse({
     res,
-    message: "Password updated successfully",
+    message: "✅ Password updated successfully",
     data: { email: user.email },
   });
 });
 
-export const hi = asyncHandler(async (req, res, next) => {
-  const { email } = req.body; 
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email is required to say hi",
-    });
-  }
-
-  const user = await findOne({
-    model: UserModel,
-    filter: { email, isActive: true },
-  });
-
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email, you can't say hi",
-    });
-  }
-
-  // نشيل الباسوورد من الاستجابة
-  const { password: _, ...userData } = user._doc;
-
-  return successResponse({
-    res,
-    message: `I say hi to ${user.fullName}`,
-    data: { user: userData },
-  });
-});
