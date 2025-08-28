@@ -3,12 +3,12 @@ export const asyncHandler = (fn) => {
     try {
       await fn(req, res, next);
     } catch (error) {
+      error.cause = 500;
       next(error);
     }
   };
 };
 
-// للرد الناجح بشكل موحد
 export const successResponse = ({ res, message = "Done", status = 200, data = {} }) => {
   return res.status(status).json({
     success: true,
@@ -17,9 +17,8 @@ export const successResponse = ({ res, message = "Done", status = 200, data = {}
   });
 };
 
-// لمعالجة الأخطاء العامة
 export const globalErrorHandling = (error, req, res, next) => {
-  return res.status(500).json({
+  return res.status(error.cause||400).json({
     success: false,
     message: error.message || "Internal Server Error",
     stack: error.stack,

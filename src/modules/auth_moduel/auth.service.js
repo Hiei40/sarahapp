@@ -1,4 +1,4 @@
-import { UserModel } from "../../DB/models/user.model.js";
+import { roleEnum, UserModel } from "../../DB/models/user.model.js";
 // import { asyncHandler } from 'express-async-handler';
 import { findOne, create } from "../../DB/db.service.js";
 import { asyncHandler, successResponse } from '../../utils/responsed.js';
@@ -7,7 +7,11 @@ import CryptoJS from "crypto-js";
 import { generateIHash } from '../../utils/security/hash.security.js'; // تأكد من أن المسار صحيح
 import {generateIEncrypt,compareEncrypt} from "../../utils/security/encryption.security.js";
 import { transporter } from "./nodemaile.js";
+import jwt from "jsonwebtoken";
+import { SignatureTypeEnum,getSignatures,verifytoken } from "../../utils/security/token.security.js";
+
 // ================== Signup Controller ==================
+
 export const signUp= async (req, res) => {
   try {
     const { fullName, email, password, phone } = req.body;
@@ -63,10 +67,10 @@ await transporter.sendMail({
 export const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // 1. ابحث عن المستخدم وتأكد أنه نشط
+  // 1. ابحث عن المستخدم بالإيميل
   const user = await findOne({
     model: UserModel,
-    filter: { email, isActive: true },
+    filter: { email: email.toLowerCase() }, // شرط الفلترة
   });
 
   if (!user) {
@@ -84,18 +88,21 @@ export const login = asyncHandler(async (req, res, next) => {
   }
 
   // 3. إنشاء التوكينات
+const   signature =await getSignatures({signaturelevel:user.role !=roleEnum.user?
+SignatureTypeEnum.system:SignatureTypeEnum.bearer});
   const accessToken = jwt.sign(
     { _id: user._id, isLoggedIn: true },
-    "FW$Q$T$#@%",
-    { expiresIn: 60 * 60 * 24 } // 24 ساعة
+signature.accessSignature    , // خليها secret مختلف
+    { expiresIn: "1d" } // 24 ساعة
   );
 
   const refreshToken = jwt.sign(
     { _id: user._id, isLoggedIn: true },
-    "FW$Q$T$#@%",
-    { expiresIn: "1y" } // سنة
+   Refreshsigntuare, // secret تاني
+    { expiresIn: "1y" }
   );
-
+console.log("Access Token:", accessToken);
+console.log("Refresh Token:", refreshToken);
   // 4. إزالة كلمة المرور من الاستجابة
   const { password: _, ...userData } = user._doc;
 
@@ -105,6 +112,9 @@ export const login = asyncHandler(async (req, res, next) => {
     data: { user: userData, accessToken, refreshToken },
   });
 });
+
+
+
 
 export const updatePassword = asyncHandler(async (req, res, next) => {
   const { email, newPassword, confirmPassword } = req.body;
@@ -150,4 +160,3 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
     data: { email: user.email },
   });
 });
-

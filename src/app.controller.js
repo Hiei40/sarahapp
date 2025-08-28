@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'node:path';
 import  dotenv from 'dotenv';
 dotenv.config({path:path.resolve("./src/config/.dev.env")});
-// import './src/DB/model/associations' // تقدر تفعلها وقت ما تحتاجها
 import userController from './modules/user_moduel/user.controller.js';
 import authController from './modules/auth_moduel/auth.controller.js';
 import connectDB from './DB/connection.db.js';
